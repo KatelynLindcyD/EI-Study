@@ -1,0 +1,164 @@
+// Command Pattern: Command interface and implementations
+interface Command {
+    void execute(Rover rover);
+}
+
+class MoveCommand implements Command {
+    public void execute(Rover rover) {
+        rover.move();
+    }
+}
+
+class TurnLeftCommand implements Command {
+    public void execute(Rover rover) {
+        rover.turnLeft();
+    }
+}
+
+class TurnRightCommand implements Command {
+    public void execute(Rover rover) {
+        rover.turnRight();
+    }
+}
+
+// Composite Pattern: Grid and Obstacle representation
+class Grid {
+    private List<Obstacle> obstacles;
+    private int size;
+
+    public Grid(int size) {
+        this.size = size;
+        this.obstacles = new ArrayList<>();
+    }
+
+    public void addObstacle(Obstacle obstacle) {
+        obstacles.add(obstacle);
+    }
+
+    public boolean isObstacle(int x, int y) {
+        for (Obstacle obstacle : obstacles) {
+            if (obstacle.getX() == x && obstacle.getY() == y) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+
+class Obstacle {
+    private int x;
+    private int y;
+
+    public Obstacle(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+}
+
+// Rover class
+enum Direction {
+    N, S, E, W
+}
+
+class Rover {
+    private int x;
+    private int y;
+    private Direction direction;
+    private Grid grid;
+
+    public Rover(int x, int y, Direction direction, Grid grid) {
+        this.x = x;
+        this.y = y;
+        this.direction = direction;
+        this.grid = grid;
+    }
+
+    public void move() {
+        int newX = x;
+        int newY = y;
+
+        switch (direction) {
+            case N:
+                newY++;
+                break;
+            case S:
+                newY--;
+                break;
+            case E:
+                newX++;
+                break;
+            case W:
+                newX--;
+                break;
+        }
+
+        if (newX >= 0 && newX < grid.getSize() && newY >= 0 && newY < grid.getSize() && !grid.isObstacle(newX, newY)) {
+            x = newX;
+            y = newY;
+        }
+    }
+
+    public void turnLeft() {
+        switch (direction) {
+            case N:
+                direction = Direction.W;
+                break;
+            case S:
+                direction = Direction.E;
+                break;
+            case E:
+                direction = Direction.N;
+                break;
+            case W:
+                direction = Direction.S;
+                break;
+        }
+    }
+
+    public void turnRight() {
+        switch (direction) {
+            case N:
+                direction = Direction.E;
+                break;
+            case S:
+                direction = Direction.W;
+                break;
+            case E:
+                direction = Direction.S;
+                break;
+            case W:
+                direction = Direction.N;
+                break;
+        }
+    }
+
+    public String getStatus() {
+        return "Rover is at (" + x + ", " + y + ") facing " + direction + ".";
+    }
+}
+
+public class MarsRoverSimulation {
+    public static void main(String[] args) {
+        Grid grid = new Grid(10);
+        grid.addObstacle(new Obstacle(2, 2));
+        grid.addObstacle(new Obstacle(3, 5));
+
+        Rover rover = new Rover(0, 0, Direction.N, grid);
+
+        Command[] commands = {new MoveCommand(), new MoveCommand(), new TurnRightCommand(), new MoveCommand(), new TurnLeftCommand(), new MoveCommand()};
+
+        for (Command command : commands) {
+            command.execute(rover);
+        }
+
+        System.out.println(rover.getStatus());
+    }
+}
